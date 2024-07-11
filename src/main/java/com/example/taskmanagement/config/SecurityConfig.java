@@ -29,7 +29,8 @@ public class SecurityConfig {
                             "/api/users/login",
                             "/api/users/{id}",
                             "/api/tasks/{id}",
-                            "/api/tasks/{id}/priority"
+                            "/api/tasks/{id}/priority",
+                            "/api/tasks"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

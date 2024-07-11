@@ -1,13 +1,8 @@
-package com.example.taskmanagement.model;
+package com.example.taskmanagement.dto;
 
-import com.example.taskmanagement.dto.TaskDTO;
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class TaskDTO {
     private Long id;
     private String title;
     private String description;
@@ -15,10 +10,8 @@ public class Task {
     private String priority;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private Long userId;
+    private String username;
 
     // Getters and Setters
 
@@ -78,28 +71,19 @@ public class Task {
         this.updatedAt = updatedAt;
     }
 
-    public User getUser() {
-        return user;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    // Method to convert Task to TaskDTO
-    public TaskDTO toDTO() {
-        TaskDTO dto = new TaskDTO();
-        dto.setId(this.id);
-        dto.setTitle(this.title);
-        dto.setDescription(this.description);
-        dto.setCategory(this.category);
-        dto.setPriority(this.priority);
-        dto.setCreatedAt(this.createdAt);
-        dto.setUpdatedAt(this.updatedAt);
-        if (this.user != null) {
-            dto.setUserId(this.user.getId());
-            dto.setUsername(this.user.getUsername());
-        }
-        return dto;
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

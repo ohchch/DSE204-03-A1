@@ -1,5 +1,6 @@
 package com.example.taskmanagement.controller;
 
+import com.example.taskmanagement.dto.TaskDTO;
 import com.example.taskmanagement.model.Task;
 import com.example.taskmanagement.model.User;
 import com.example.taskmanagement.service.TaskService;
@@ -21,15 +22,23 @@ public class TaskController {
     private UserService userService;
 
     @PostMapping
-    public Task createTask(@RequestBody Task task, @RequestParam String username) {
-        User user = userService.findByUsername(username);
+    public TaskDTO createTask(@RequestBody TaskDTO taskDTO, @RequestParam Long userId) {
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+        Task task = new Task();
+        task.setTitle(taskDTO.getTitle());
+        task.setDescription(taskDTO.getDescription());
+        task.setCategory(taskDTO.getCategory());
+        task.setPriority(taskDTO.getPriority());
+        task.setUser(user);
         return taskService.createTask(task, user);
     }
+    
 
     @GetMapping
-    public List<Task> getTasks(@RequestParam(required = false) String title,
-                               @RequestParam(required = false) String category,
-                               @RequestParam(required = false) String priority) {
+    public List<TaskDTO> getTasks(@RequestParam(required = false) String title,
+                                  @RequestParam(required = false) String category,
+                                  @RequestParam(required = false) String priority) {
         if (title != null) {
             return taskService.findTasksByTitle(title);
         } else if (category != null) {
@@ -42,21 +51,21 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
-        Optional<Task> task = taskService.findById(id);
+    public ResponseEntity<TaskDTO> getTaskById(@PathVariable Long id) {
+        Optional<TaskDTO> task = taskService.findById(id);
         return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task taskDetails) {
-        Optional<Task> task = taskService.findById(id);
-        if (task.isPresent()) {
-            Task updatedTask = task.get();
-            updatedTask.setTitle(taskDetails.getTitle());
-            updatedTask.setDescription(taskDetails.getDescription());
-            updatedTask.setCategory(taskDetails.getCategory());
-            updatedTask.setPriority(taskDetails.getPriority());
-            taskService.updateTask(updatedTask);
+    public ResponseEntity<TaskDTO> updateTask(@PathVariable Long id, @RequestBody TaskDTO taskDetails) {
+        Optional<TaskDTO> taskOptional = taskService.findById(id);
+        if (taskOptional.isPresent()) {
+            TaskDTO taskDTO = taskOptional.get();
+            taskDTO.setTitle(taskDetails.getTitle());
+            taskDTO.setDescription(taskDetails.getDescription());
+            taskDTO.setCategory(taskDetails.getCategory());
+            taskDTO.setPriority(taskDetails.getPriority());
+            TaskDTO updatedTask = taskService.updateTask(taskDTO);
             return ResponseEntity.ok(updatedTask);
         } else {
             return ResponseEntity.notFound().build();
@@ -74,12 +83,12 @@ public class TaskController {
     }
 
     @PutMapping("/{id}/priority")
-    public ResponseEntity<Task> updateTaskPriority(@PathVariable Long id, @RequestBody String priority) {
-        Optional<Task> task = taskService.findById(id);
-        if (task.isPresent()) {
-            Task updatedTask = task.get();
-            updatedTask.setPriority(priority);
-            taskService.updateTask(updatedTask);
+    public ResponseEntity<TaskDTO> updateTaskPriority(@PathVariable Long id, @RequestBody String priority) {
+        Optional<TaskDTO> taskOptional = taskService.findById(id);
+        if (taskOptional.isPresent()) {
+            TaskDTO taskDTO = taskOptional.get();
+            taskDTO.setPriority(priority);
+            TaskDTO updatedTask = taskService.updateTask(taskDTO);
             return ResponseEntity.ok(updatedTask);
         } else {
             return ResponseEntity.notFound().build();
